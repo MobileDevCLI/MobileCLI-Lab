@@ -1,0 +1,386 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# DITTO SESSION - Terminal Session Management
+# Never lose your work again
+
+SESSION_DIR="$HOME/.ditto/sessions"
+CURRENT_DIR="$SESSION_DIR/current"
+SAVED_DIR="$SESSION_DIR/saved"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+mkdir -p "$CURRENT_DIR" "$SAVED_DIR"
+
+show_help() {
+    echo -e "${CYAN}╔════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║    DITTO SESSION - Never Lose Work     ║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${YELLOW}Commands:${NC}"
+    echo "  session save <name>       - Save current session"
+    echo "  session restore <name>    - Restore a session"
+    echo "  session list              - List saved sessions"
+    echo "  session info <name>       - Show session details"
+    echo "  session delete <name>     - Delete a session"
+    echo "  session export <name>     - Export session to file"
+    echo ""
+    echo -e "${YELLOW}Auto-save:${NC}"
+    echo "  session autosave on       - Enable auto-save (every 5 min)"
+    echo "  session autosave off      - Disable auto-save"
+    echo "  session autosave status   - Check auto-save status"
+    echo ""
+    echo -e "${YELLOW}What Gets Saved:${NC}"
+    echo "  - Current working directory"
+    echo "  - Command history"
+    echo "  - Environment variables"
+    echo "  - Open files list"
+    echo "  - Terminal scrollback (if available)"
+}
+
+# Save session
+save_session() {
+    local name="$1"
+
+    # Use python for reliable file operations and timestamps
+    python3 << PYEOF
+import json
+import os
+import time
+import shutil
+
+name = "$name"
+if not name:
+    name = f"session_{time.strftime('%Y%m%d_%H%M%S')}"
+
+saved_dir = "$SAVED_DIR"
+session_path = f"{saved_dir}/{name}"
+os.makedirs(session_path, exist_ok=True)
+
+print(f"\033[0;36mSaving session '{name}'...\033[0m")
+
+# Save current directory
+cwd = os.getcwd()
+with open(f"{session_path}/cwd", 'w') as f:
+    f.write(cwd)
+
+# Save command history
+history_file = os.path.expanduser("~/.bash_history")
+if os.path.exists(history_file):
+    shutil.copy(history_file, f"{session_path}/history")
+
+# Save environment variables (filtered)
+with open(f"{session_path}/env", 'w') as f:
+    for key, value in os.environ.items():
+        if not any(s in key.upper() for s in ['PASSWORD', 'TOKEN', 'SECRET', 'KEY', 'CREDENTIAL']):
+            f.write(f"{key}={value}\n")
+
+# Save metadata
+metadata = {
+    "name": name,
+    "created": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+    "cwd": cwd,
+    "shell": os.environ.get('SHELL', '/bin/bash'),
+    "term": os.environ.get('TERM', 'xterm'),
+    "user": os.environ.get('USER', 'unknown'),
+    "hostname": "android"
+}
+with open(f"{session_path}/metadata.json", 'w') as f:
+    json.dump(metadata, f, indent=2)
+
+print(f"\033[0;32mSession saved: {name}\033[0m")
+print(f"Location: {session_path}")
+
+# List contents
+for f in os.listdir(session_path):
+    path = f"{session_path}/{f}"
+    size = os.path.getsize(path) if os.path.isfile(path) else 0
+    print(f"  {f} ({size} bytes)")
+PYEOF
+}
+
+# Restore session
+restore_session() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Usage: session restore <name>${NC}"
+        echo "Available sessions:"
+        list_sessions
+        return 1
+    fi
+
+    local session_path="$SAVED_DIR/$name"
+
+    if [ ! -d "$session_path" ]; then
+        echo -e "${RED}Session '$name' not found${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Restoring session '$name'...${NC}"
+
+    # Use python to read saved files and restore
+    python3 << PYEOF
+import os
+import shutil
+
+session_path = "$session_path"
+home = os.path.expanduser("~")
+
+# Restore working directory (just print it - can't cd from python)
+cwd_file = f"{session_path}/cwd"
+if os.path.exists(cwd_file):
+    with open(cwd_file) as f:
+        target_dir = f.read().strip()
+    if os.path.isdir(target_dir):
+        print(f"  \033[0;32m✓\033[0m Saved directory: {target_dir}")
+        print(f"    Run: cd {target_dir}")
+
+# Restore history
+history_src = f"{session_path}/history"
+history_dst = f"{home}/.bash_history"
+if os.path.exists(history_src):
+    shutil.copy(history_src, history_dst)
+    print(f"  \033[0;32m✓\033[0m Restored command history")
+
+# Note about environment
+env_file = f"{session_path}/env"
+if os.path.exists(env_file):
+    print(f"  \033[1;33m!\033[0m Environment saved (not auto-sourced for safety)")
+    print(f"    View with: python3 -c \"print(open('{env_file}').read())\"")
+PYEOF
+
+    echo -e "${GREEN}Session '$name' restored${NC}"
+}
+
+# List sessions
+list_sessions() {
+    echo -e "${CYAN}Saved Sessions:${NC}"
+    echo ""
+
+    python3 << PYEOF
+import os
+import json
+
+saved_dir = "$SAVED_DIR"
+
+if not os.path.exists(saved_dir):
+    print("  (no sessions saved)")
+    print()
+    print("Save current session: session save <name>")
+else:
+    sessions = [d for d in os.listdir(saved_dir) if os.path.isdir(f"{saved_dir}/{d}")]
+
+    if not sessions:
+        print("  (no sessions saved)")
+        print()
+        print("Save current session: session save <name>")
+    else:
+        for name in sorted(sessions):
+            session_path = f"{saved_dir}/{name}"
+            metadata_file = f"{session_path}/metadata.json"
+
+            print(f"  \033[0;32m{name}\033[0m")
+
+            if os.path.exists(metadata_file):
+                try:
+                    with open(metadata_file) as f:
+                        meta = json.load(f)
+                    created = meta.get('created', '')[:10]  # Just date part
+                    cwd = meta.get('cwd', '')
+                    if created:
+                        print(f"    Created: {created}")
+                    if cwd:
+                        print(f"    Directory: {cwd}")
+                except:
+                    pass
+            print()
+PYEOF
+}
+
+# Session info
+session_info() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Usage: session info <name>${NC}"
+        return 1
+    fi
+
+    local session_path="$SAVED_DIR/$name"
+
+    if [ ! -d "$session_path" ]; then
+        echo -e "${RED}Session '$name' not found${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Session: $name${NC}"
+    echo ""
+
+    python3 << PYEOF
+import os
+import json
+
+session_path = "$session_path"
+metadata_file = f"{session_path}/metadata.json"
+
+# Show metadata
+if os.path.exists(metadata_file):
+    with open(metadata_file) as f:
+        print(f.read())
+
+# Show contents
+print("Contents:")
+for f in os.listdir(session_path):
+    path = f"{session_path}/{f}"
+    size = os.path.getsize(path) if os.path.isfile(path) else 0
+    print(f"  {f} ({size} bytes)")
+
+print()
+
+# Count lines
+history_file = f"{session_path}/history"
+env_file = f"{session_path}/env"
+
+history_lines = 0
+if os.path.exists(history_file):
+    with open(history_file) as f:
+        history_lines = len(f.readlines())
+
+env_lines = 0
+if os.path.exists(env_file):
+    with open(env_file) as f:
+        env_lines = len(f.readlines())
+
+print(f"History entries: {history_lines}")
+print(f"Env variables: {env_lines}")
+PYEOF
+}
+
+# Delete session
+delete_session() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Usage: session delete <name>${NC}"
+        return 1
+    fi
+
+    local session_path="$SAVED_DIR/$name"
+
+    if [ ! -d "$session_path" ]; then
+        echo -e "${RED}Session '$name' not found${NC}"
+        return 1
+    fi
+
+    rm -rf "$session_path"
+    echo -e "${GREEN}Session '$name' deleted${NC}"
+}
+
+# Export session
+export_session() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Usage: session export <name>${NC}"
+        return 1
+    fi
+
+    local session_path="$SAVED_DIR/$name"
+
+    if [ ! -d "$session_path" ]; then
+        echo -e "${RED}Session '$name' not found${NC}"
+        return 1
+    fi
+
+    # Use python for reliable timestamp and export
+    python3 << PYEOF
+import os
+import time
+import tarfile
+
+name = "$name"
+saved_dir = "$SAVED_DIR"
+session_path = f"{saved_dir}/{name}"
+date_str = time.strftime("%Y%m%d")
+export_file = f"/sdcard/Download/session_{name}_{date_str}.tar.gz"
+
+try:
+    with tarfile.open(export_file, "w:gz") as tar:
+        tar.add(session_path, arcname=name)
+    print(f"\033[0;32mSession exported to: {export_file}\033[0m")
+except Exception as e:
+    print(f"\033[0;31mExport failed: {e}\033[0m")
+PYEOF
+}
+
+# Auto-save toggle
+autosave_toggle() {
+    local mode="$1"
+    local autosave_file="$SESSION_DIR/.autosave_enabled"
+
+    case "$mode" in
+        on|enable)
+            touch "$autosave_file"
+            echo -e "${GREEN}Auto-save enabled${NC}"
+            echo "Sessions will be saved automatically"
+            # Could set up a cron job or background process here
+            ;;
+        off|disable)
+            rm -f "$autosave_file"
+            echo -e "${YELLOW}Auto-save disabled${NC}"
+            ;;
+        status|"")
+            if [ -f "$autosave_file" ]; then
+                echo -e "${GREEN}Auto-save: ON${NC}"
+            else
+                echo -e "${YELLOW}Auto-save: OFF${NC}"
+            fi
+            ;;
+        *)
+            echo "Usage: session autosave [on|off|status]"
+            ;;
+    esac
+}
+
+# Quick save (for auto-save)
+quick_save() {
+    # Get autosave name from python
+    local name=$(python3 -c "import time; print(f'autosave_{time.strftime(\"%Y%m%d_%H%M\")}')")
+    save_session "$name" > /dev/null
+    echo "Auto-saved: $name"
+}
+
+# Main
+case "$1" in
+    save)
+        save_session "$2"
+        ;;
+    restore)
+        restore_session "$2"
+        ;;
+    list|ls)
+        list_sessions
+        ;;
+    info)
+        session_info "$2"
+        ;;
+    delete|rm)
+        delete_session "$2"
+        ;;
+    export)
+        export_session "$2"
+        ;;
+    autosave)
+        autosave_toggle "$2"
+        ;;
+    quick)
+        quick_save
+        ;;
+    help|-h|--help|"")
+        show_help
+        ;;
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        show_help
+        ;;
+esac

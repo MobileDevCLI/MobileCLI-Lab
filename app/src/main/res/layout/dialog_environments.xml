@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Use {{VAR_NAME}} in URLs and headers"
+        android:textSize="12sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="16dp" />
+
+    <!-- BASE_URL -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BASE_URL"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/input_base_url"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="https://api.example.com"
+        android:inputType="textUri"
+        android:padding="8dp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- API_KEY -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="API_KEY"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/input_api_key"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="your-api-key-here"
+        android:inputType="textPassword"
+        android:padding="8dp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- AUTH_TOKEN -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AUTH_TOKEN"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/input_auth_token"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Bearer token..."
+        android:inputType="textPassword"
+        android:padding="8dp" />
+
+</LinearLayout>

@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "updated": "2026-01-07",
+  "apps": [
+    {
+      "id": "neofetch",
+      "name": "Neofetch",
+      "version": "7.1.0",
+      "author": "dylanaraps",
+      "description": "System information tool with ASCII art",
+      "category": "tools",
+      "install_type": "pkg",
+      "install_cmd": "pkg install neofetch -y",
+      "size": "50KB"
+    },
+    {
+      "id": "htop",
+      "name": "htop",
+      "version": "3.3.0",
+      "author": "htop-dev",
+      "description": "Interactive process viewer",
+      "category": "tools",
+      "install_type": "pkg",
+      "install_cmd": "pkg install htop -y",
+      "size": "200KB"
+    },
+    {
+      "id": "nano",
+      "name": "GNU Nano",
+      "version": "8.0",
+      "author": "GNU",
+      "description": "Easy-to-use text editor",
+      "category": "tools",
+      "install_type": "pkg",
+      "install_cmd": "pkg install nano -y",
+      "size": "500KB"
+    },
+    {
+      "id": "vim",
+      "name": "Vim",
+      "version": "9.1",
+      "author": "Bram Moolenaar",
+      "description": "Powerful text editor",
+      "category": "tools",
+      "install_type": "pkg",
+      "install_cmd": "pkg install vim -y",
+      "size": "3MB"
+    },
+    {
+      "id": "tmux",
+      "name": "tmux",
+      "version": "3.4",
+      "author": "tmux",
+      "description": "Terminal multiplexer",
+      "category": "tools",
+      "install_type": "pkg",
+      "install_cmd": "pkg install tmux -y",
+      "size": "800KB"
+    },
+    {
+      "id": "ffmpeg",
+      "name": "FFmpeg",
+      "version": "6.1",
+      "author": "FFmpeg team",
+      "description": "Audio/video converter and streamer",
+      "category": "tools",
+      "install_type": "pkg",
+      "install_cmd": "pkg install ffmpeg -y",
+      "size": "50MB"
+    },
+    {
+      "id": "yt-dlp",
+      "name": "yt-dlp",
+      "version": "2024.01",
+      "author": "yt-dlp",
+      "description": "Download videos from YouTube and more",
+      "category": "tools",
+      "install_type": "pkg",
+      "install_cmd": "pkg install yt-dlp -y",
+      "size": "5MB"
+    },
+    {
+      "id": "cowsay",
+      "name": "Cowsay",
+      "version": "3.04",
+      "author": "Tony Monroe",
+      "description": "Talking cow ASCII art",
+      "category": "games",
+      "install_type": "pkg",
+      "install_cmd": "pkg install cowsay -y",
+      "size": "50KB"
+    },
+    {
+      "id": "figlet",
+      "name": "FIGlet",
+      "version": "2.2.5",
+      "author": "FIGlet",
+      "description": "Make large ASCII art text",
+      "category": "tools",
+      "install_type": "pkg",
+      "install_cmd": "pkg install figlet -y",
+      "size": "100KB"
+    },
+    {
+      "id": "sl",
+      "name": "SL (Steam Locomotive)",
+      "version": "5.02",
+      "author": "mtoyoda",
+      "description": "Cure your bad habit of typing sl",
+      "category": "games",
+      "install_type": "pkg",
+      "install_cmd": "pkg install sl -y",
+      "size": "20KB"
+    }
+  ]
+}

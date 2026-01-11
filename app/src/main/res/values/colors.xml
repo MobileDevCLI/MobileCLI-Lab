@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- MobileCLI Studio Color Palette -->
+
+    <!-- Backgrounds -->
+    <color name="background">#1A1A2E</color>
+    <color name="surface">#16213E</color>
+    <color name="surface_dark">#0F0F1A</color>
+    <color name="surface_elevated">#1E1E3A</color>
+    <color name="surface_variant">#1C1C30</color>
+    <color name="console_background">#0A0A14</color>
+
+    <!-- Primary Colors -->
+    <color name="primary">#E94560</color>
+    <color name="primary_variant">#B33B4A</color>
+    <color name="primary_light">#FF6B7F</color>
+    <color name="on_primary">#FFFFFF</color>
+
+    <!-- Secondary Colors -->
+    <color name="secondary">#2196F3</color>
+    <color name="secondary_variant">#1976D2</color>
+    <color name="on_secondary">#FFFFFF</color>
+
+    <!-- Tertiary / Accent -->
+    <color name="tertiary">#4CAF50</color>
+    <color name="on_tertiary">#FFFFFF</color>
+
+    <!-- Status Colors -->
+    <color name="success">#4CAF50</color>
+    <color name="success_light">#81C784</color>
+    <color name="warning">#FF9800</color>
+    <color name="warning_light">#FFB74D</color>
+    <color name="error">#F44336</color>
+    <color name="error_light">#E57373</color>
+    <color name="info">#2196F3</color>
+    <color name="info_light">#64B5F6</color>
+
+    <!-- Text Colors -->
+    <color name="text">#FFFFFF</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#888888</color>
+    <color name="text_disabled">#555555</color>
+    <color name="text_hint">#666666</color>
+
+    <!-- Borders and Dividers -->
+    <color name="border">#333333</color>
+    <color name="divider">#2A2A2A</color>
+
+    <!-- Selection and Interaction -->
+    <color name="selection">#3A3A5A</color>
+    <color name="hover">#2A2A4A</color>
+    <color name="ripple">#40FFFFFF</color>
+
+    <!-- Console Colors -->
+    <color name="console_info">#00FF00</color>
+    <color name="console_warning">#FFFF00</color>
+    <color name="console_error">#FF4444</color>
+    <color name="console_debug">#888888</color>
+
+    <!-- Room Colors (for home screen cards) -->
+    <color name="room_mobile_apps">#4CAF50</color>
+    <color name="room_web_dev">#2196F3</color>
+    <color name="room_terminal">#9C27B0</color>
+    <color name="room_data_science">#FF9800</color>
+    <color name="room_api_backend">#00BCD4</color>
+    <color name="room_ai_ml">#E94560</color>
+
+    <!-- Code Syntax Highlighting -->
+    <color name="syntax_keyword">#FF79C6</color>
+    <color name="syntax_string">#F1FA8C</color>
+    <color name="syntax_number">#BD93F9</color>
+    <color name="syntax_comment">#6272A4</color>
+    <color name="syntax_function">#50FA7B</color>
+    <color name="syntax_class">#8BE9FD</color>
+    <color name="syntax_operator">#FF79C6</color>
+
+    <!-- Toolbar -->
+    <color name="toolbar_background">#0F0F1A</color>
+    <color name="toolbar_text">#FFFFFF</color>
+
+    <!-- Panel Headers -->
+    <color name="panel_header">#16213E</color>
+    <color name="panel_header_text">#888888</color>
+
+    <!-- Tab Colors -->
+    <color name="tab_selected">#1A1A2E</color>
+    <color name="tab_unselected">#0F0F1A</color>
+    <color name="tab_indicator">#E94560</color>
+
+    <!-- Button Colors -->
+    <color name="button_primary">#E94560</color>
+    <color name="button_secondary">#16213E</color>
+    <color name="button_success">#4CAF50</color>
+    <color name="button_danger">#F44336</color>
+    <color name="button_disabled">#333333</color>
+
+    <!-- Input Fields -->
+    <color name="input_background">#0F0F1A</color>
+    <color name="input_border">#333333</color>
+    <color name="input_border_focused">#E94560</color>
+    <color name="input_text">#FFFFFF</color>
+    <color name="input_hint">#666666</color>
+
+    <!-- File Tree -->
+    <color name="tree_folder">#FFC107</color>
+    <color name="tree_file">#FFFFFF</color>
+    <color name="tree_kotlin">#A97BFF</color>
+    <color name="tree_java">#FF7043</color>
+    <color name="tree_xml">#8BC34A</color>
+    <color name="tree_json">#FFD54F</color>
+    <color name="tree_python">#4FC3F7</color>
+    <color name="tree_javascript">#FFEB3B</color>
+
+    <!-- Material Design compatibility -->
+    <color name="colorPrimary">@color/primary</color>
+    <color name="colorPrimaryVariant">@color/primary_variant</color>
+    <color name="colorOnPrimary">@color/on_primary</color>
+    <color name="colorSecondary">@color/secondary</color>
+    <color name="colorSecondaryVariant">@color/secondary_variant</color>
+    <color name="colorOnSecondary">@color/on_secondary</color>
+    <color name="colorError">@color/error</color>
+    <color name="colorOnError">@color/on_primary</color>
+    <color name="colorSurface">@color/surface</color>
+    <color name="colorOnSurface">@color/text_primary</color>
+    <color name="colorBackground">@color/background</color>
+    <color name="colorOnBackground">@color/text_primary</color>
+</resources>

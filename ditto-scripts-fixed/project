@@ -1,0 +1,691 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# DITTO PROJECT - Simplified Version Control
+# Git made simple for everyone
+
+PROJECT_DIR="$HOME/.ditto/projects"
+CONFIG_FILE="$HOME/.ditto/config/projects.json"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+NC='\033[0m'
+
+mkdir -p "$PROJECT_DIR"
+
+show_help() {
+    echo -e "${CYAN}╔════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║   DITTO PROJECT - Version Control      ║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${YELLOW}Getting Started:${NC}"
+    echo "  project init                 - Start tracking current folder"
+    echo "  project init <name>          - Create new project"
+    echo "  project status               - See what changed"
+    echo ""
+    echo -e "${YELLOW}Snapshots (like save points):${NC}"
+    echo "  project save \"message\"       - Save a snapshot"
+    echo "  project history              - View all snapshots"
+    echo "  project show <n>             - Show snapshot details"
+    echo "  project restore <n>          - Go back to snapshot"
+    echo "  project diff                 - See changes since last save"
+    echo ""
+    echo -e "${YELLOW}Variations (like branches):${NC}"
+    echo "  project branch <name>        - Create a variation"
+    echo "  project branches             - List all variations"
+    echo "  project switch <name>        - Switch to variation"
+    echo "  project merge <name>         - Combine variations"
+    echo ""
+    echo -e "${YELLOW}Sharing:${NC}"
+    echo "  project share                - Upload to GitHub"
+    echo "  project clone <url>          - Download a project"
+    echo "  project pull                 - Get updates"
+    echo "  project push                 - Send updates"
+    echo ""
+    echo -e "${YELLOW}Collaboration:${NC}"
+    echo "  project invite <user>        - Invite collaborator"
+    echo "  project fix-submit \"desc\"    - Submit a fix"
+    echo ""
+    echo -e "${YELLOW}Auto-save:${NC}"
+    echo "  project autosave on          - Enable auto-snapshots"
+    echo "  project autosave off         - Disable auto-snapshots"
+}
+
+# Initialize project
+init_project() {
+    local name="$1"
+    local target_dir="$(pwd)"
+
+    if [ -n "$name" ]; then
+        target_dir="$HOME/$name"
+        mkdir -p "$target_dir"
+        cd "$target_dir"
+    fi
+
+    if [ -d ".git" ]; then
+        echo -e "${YELLOW}Project already initialized${NC}"
+        echo "Use 'project status' to see changes"
+        return 0
+    fi
+
+    echo -e "${CYAN}Initializing project in $(pwd)...${NC}"
+
+    git init -q
+
+    # Create sensible .gitignore
+    cat > .gitignore << 'EOF'
+# DITTO auto-generated gitignore
+node_modules/
+__pycache__/
+*.pyc
+.env
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+build/
+dist/
+*.apk
+*.aab
+.gradle/
+local.properties
+EOF
+
+    # Create initial commit
+    git add -A
+    git commit -q -m "Project created with DITTO"
+
+    echo -e "${GREEN}✓ Project initialized${NC}"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Make changes to your files"
+    echo "  2. Run 'project save \"description\"' to save a snapshot"
+    echo "  3. Run 'project share' to upload to GitHub"
+}
+
+# Show status
+show_status() {
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder. Run 'project init' first${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Project Status${NC}"
+    echo ""
+
+    local branch=$(git branch --show-current 2>/dev/null)
+    echo -e "Current variation: ${GREEN}$branch${NC}"
+
+    local commits=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+    echo -e "Total snapshots: ${YELLOW}$commits${NC}"
+
+    echo ""
+
+    # Check for changes
+    local changes=$(git status --porcelain 2>/dev/null)
+
+    if [ -z "$changes" ]; then
+        echo -e "${GREEN}✓ No changes since last save${NC}"
+    else
+        echo -e "${YELLOW}Changes detected:${NC}"
+        echo ""
+
+        # Count types
+        local added=$(echo "$changes" | grep -c "^??" 2>/dev/null || true)
+        local modified=$(echo "$changes" | grep -c "^ M\|^M " 2>/dev/null || true)
+        local deleted=$(echo "$changes" | grep -c "^ D\|^D " 2>/dev/null || true)
+
+        added=${added:-0}
+        modified=${modified:-0}
+        deleted=${deleted:-0}
+
+        [[ $added -gt 0 ]] && echo -e "  ${GREEN}+ $added new file(s)${NC}"
+        [[ $modified -gt 0 ]] && echo -e "  ${YELLOW}~ $modified modified${NC}"
+        [[ $deleted -gt 0 ]] && echo -e "  ${RED}- $deleted deleted${NC}"
+
+        echo ""
+        echo "Run 'project save \"message\"' to save these changes"
+    fi
+}
+
+# Save snapshot
+save_snapshot() {
+    local message="$*"
+
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder. Run 'project init' first${NC}"
+        return 1
+    fi
+
+    if [ -z "$message" ]; then
+        message="Snapshot $(python3 -c "import time; print(time.strftime('%Y-%m-%d %H:%M'))")"
+    fi
+
+    # Check for changes
+    local changes=$(git status --porcelain 2>/dev/null)
+
+    if [ -z "$changes" ]; then
+        echo -e "${YELLOW}No changes to save${NC}"
+        return 0
+    fi
+
+    echo -e "${CYAN}Saving snapshot...${NC}"
+
+    git add -A
+    git commit -q -m "$message"
+
+    local hash=$(git rev-parse --short HEAD)
+
+    echo -e "${GREEN}✓ Snapshot saved: $hash${NC}"
+    echo -e "  ${YELLOW}\"$message\"${NC}"
+
+    # Show what was saved
+    local stats=$(git diff --stat HEAD~1 2>/dev/null | tail -1)
+    echo -e "  $stats"
+}
+
+# View history
+view_history() {
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Project History${NC}"
+    echo ""
+
+    # Use python for reliable parsing
+    python3 << PYEOF
+import subprocess
+import sys
+
+try:
+    result = subprocess.run(['git', 'log', '--format=%h|%ar|%s', '-n', '20'],
+                          capture_output=True, text=True)
+    lines = result.stdout.strip().split('\n')
+
+    if not lines or lines == ['']:
+        print("\033[1;33mNo snapshots yet\033[0m")
+        print("Run 'project save \"message\"' to create one")
+        sys.exit(0)
+
+    for i, line in enumerate(lines):
+        if not line:
+            continue
+        parts = line.split('|', 2)
+        if len(parts) >= 3:
+            hash_val, date_val, msg = parts
+            print(f"\033[0;32m[{i:2d}]\033[0m \033[1;33m{date_val}\033[0m {hash_val}")
+            print(f"     {msg}")
+            print()
+except Exception as e:
+    print(f"Error: {e}")
+PYEOF
+}
+
+# Show snapshot details
+show_snapshot() {
+    local n="${1:-0}"
+
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    local hash=$(git rev-parse "HEAD~$n" 2>/dev/null)
+
+    if [ -z "$hash" ]; then
+        echo -e "${RED}Snapshot $n not found${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Snapshot Details${NC}"
+    echo ""
+
+    git show --stat "$hash" | head -30
+
+    echo ""
+    echo -e "${YELLOW}To restore: project restore $n${NC}"
+}
+
+# Restore to snapshot
+restore_snapshot() {
+    local n="$1"
+
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    if [ -z "$n" ]; then
+        echo -e "${RED}Usage: project restore <snapshot-number>${NC}"
+        echo "Run 'project history' to see available snapshots"
+        return 1
+    fi
+
+    # Check for unsaved changes
+    local changes=$(git status --porcelain 2>/dev/null)
+    if [ -n "$changes" ]; then
+        echo -e "${YELLOW}Warning: You have unsaved changes!${NC}"
+        read -p "Save them first? (y/n): " save_first
+        if [ "$save_first" = "y" ]; then
+            save_snapshot "Auto-save before restore"
+        fi
+    fi
+
+    local hash=$(git rev-parse "HEAD~$n" 2>/dev/null)
+
+    if [ -z "$hash" ]; then
+        echo -e "${RED}Snapshot $n not found${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Restoring to snapshot $n...${NC}"
+
+    # Create restore branch
+    local restore_branch="restore-$(python3 -c "import time; print(int(time.time()))")"
+    git checkout -q "$hash"
+    git checkout -q -b "$restore_branch"
+
+    echo -e "${GREEN}✓ Restored to snapshot $n${NC}"
+    echo -e "You're now on variation: ${YELLOW}$restore_branch${NC}"
+    echo ""
+    echo "To go back to latest: project switch main"
+}
+
+# Show diff
+show_diff() {
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Changes since last save:${NC}"
+    echo ""
+
+    git diff --color
+    git diff --cached --color
+}
+
+# Create branch
+create_branch() {
+    local name="$1"
+
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    if [ -z "$name" ]; then
+        echo -e "${RED}Usage: project branch <name>${NC}"
+        return 1
+    fi
+
+    git checkout -q -b "$name"
+
+    echo -e "${GREEN}✓ Created variation: $name${NC}"
+    echo "You're now working on this variation"
+}
+
+# List branches
+list_branches() {
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Project Variations:${NC}"
+    echo ""
+
+    git branch --list | while read -r branch; do
+        if [[ "$branch" == \** ]]; then
+            echo -e "  ${GREEN}$branch${NC} (current)"
+        else
+            echo "  $branch"
+        fi
+    done
+}
+
+# Switch branch
+switch_branch() {
+    local name="$1"
+
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    if [ -z "$name" ]; then
+        echo -e "${RED}Usage: project switch <variation-name>${NC}"
+        list_branches
+        return 1
+    fi
+
+    git checkout -q "$name" 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Switched to: $name${NC}"
+    else
+        echo -e "${RED}Variation '$name' not found${NC}"
+        list_branches
+    fi
+}
+
+# Merge branch
+merge_branch() {
+    local name="$1"
+
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    if [ -z "$name" ]; then
+        echo -e "${RED}Usage: project merge <variation-name>${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Merging $name into current variation...${NC}"
+
+    git merge -q "$name" 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Merged successfully${NC}"
+    else
+        echo -e "${YELLOW}Merge conflicts detected!${NC}"
+        echo "Edit the conflicting files, then run 'project save \"Resolved conflicts\"'"
+    fi
+}
+
+# Share to GitHub
+share_project() {
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    # Check for remote
+    local remote=$(git remote get-url origin 2>/dev/null)
+
+    if [ -n "$remote" ]; then
+        echo -e "${CYAN}Uploading to GitHub...${NC}"
+        git push -u origin $(git branch --show-current)
+
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Uploaded successfully${NC}"
+            echo "View at: $remote"
+        else
+            echo -e "${RED}Upload failed${NC}"
+            echo "Check your GitHub credentials: setup-github"
+        fi
+    else
+        echo -e "${YELLOW}No GitHub repository linked${NC}"
+        echo ""
+        echo "To share this project:"
+        echo "  1. Create a repo on GitHub"
+        echo "  2. Run: git remote add origin https://github.com/YOU/REPO.git"
+        echo "  3. Run: project share"
+        echo ""
+        echo "Or use 'gh repo create' if you have GitHub CLI"
+    fi
+}
+
+# Clone project
+clone_project() {
+    local url="$1"
+
+    if [ -z "$url" ]; then
+        echo -e "${RED}Usage: project clone <github-url>${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Downloading project...${NC}"
+
+    git clone "$url"
+
+    if [ $? -eq 0 ]; then
+        local name=$(basename "$url" .git)
+        echo -e "${GREEN}✓ Downloaded: $name${NC}"
+        echo "Run: cd $name"
+    else
+        echo -e "${RED}Download failed${NC}"
+    fi
+}
+
+# Pull updates
+pull_updates() {
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Getting updates...${NC}"
+
+    git pull
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Up to date${NC}"
+    fi
+}
+
+# Push updates
+push_updates() {
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Sending updates...${NC}"
+
+    git push
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Uploaded${NC}"
+    else
+        echo -e "${RED}Upload failed${NC}"
+    fi
+}
+
+# Auto-save toggle
+autosave_toggle() {
+    local mode="$1"
+    local autosave_marker="$HOME/.ditto/scripts/.autosave_enabled"
+
+    case "$mode" in
+        on|enable)
+            # Use python to create autosave script
+            python3 << PYEOF
+import os
+
+scripts_dir = os.path.expanduser("~/.ditto/scripts")
+os.makedirs(scripts_dir, exist_ok=True)
+
+script_content = '''#!/data/data/com.termux/files/usr/bin/python3
+# Auto-save projects every 10 minutes
+import subprocess
+import time
+import os
+import glob
+
+while True:
+    time.sleep(600)
+    home = os.path.expanduser("~")
+    for dir_path in glob.glob(f"{home}/*/"):
+        git_dir = os.path.join(dir_path, ".git")
+        if os.path.isdir(git_dir):
+            os.chdir(dir_path)
+            result = subprocess.run(['git', 'status', '--porcelain'],
+                                   capture_output=True, text=True)
+            if result.stdout.strip():
+                subprocess.run(['git', 'add', '-A'])
+                msg = f"Auto-save {time.strftime('%Y-%m-%d %H:%M')}"
+                subprocess.run(['git', 'commit', '-q', '-m', msg])
+'''
+
+script_path = f"{scripts_dir}/project-autosave.py"
+with open(script_path, 'w') as f:
+    f.write(script_content)
+os.chmod(script_path, 0o755)
+
+# Create marker file
+with open(f"{scripts_dir}/.autosave_enabled", 'w') as f:
+    f.write("enabled")
+
+print("Script created at:", script_path)
+PYEOF
+            echo -e "${GREEN}Auto-save enabled${NC}"
+            echo "Run: nohup python3 ~/.ditto/scripts/project-autosave.py &"
+            echo "Snapshots will be saved every 10 minutes"
+            ;;
+        off|disable)
+            pkill -f "project-autosave" 2>/dev/null
+            rm -f "$autosave_marker"
+            echo -e "${YELLOW}Auto-save disabled${NC}"
+            ;;
+        status|"")
+            if pgrep -f "project-autosave" > /dev/null; then
+                echo -e "${GREEN}Auto-save: ON${NC}"
+            else
+                echo -e "${YELLOW}Auto-save: OFF${NC}"
+            fi
+            ;;
+    esac
+}
+
+# Submit fix
+submit_fix() {
+    local description="$*"
+
+    if [ -z "$description" ]; then
+        echo -e "${RED}Usage: project fix-submit \"description of fix\"${NC}"
+        return 1
+    fi
+
+    if [ ! -d ".git" ]; then
+        echo -e "${RED}Not a project folder${NC}"
+        return 1
+    fi
+
+    # Use python for reliable file operations
+    python3 << PYEOF
+import subprocess
+import json
+import os
+import time
+
+description = """$description"""
+fix_dir = os.path.expanduser("~/.ditto/fixes")
+os.makedirs(fix_dir, exist_ok=True)
+
+# Get git diff
+result = subprocess.run(['git', 'diff'], capture_output=True, text=True)
+diff_content = result.stdout
+
+if not diff_content.strip():
+    print("\033[1;33mNo changes to submit\033[0m")
+    exit(1)
+
+print("\033[0;36mSubmitting fix...\033[0m")
+print(f"Description: \033[1;33m{description}\033[0m")
+print()
+
+# Generate fix ID
+fix_id = f"fix_{time.strftime('%Y%m%d_%H%M%S')}"
+
+# Save patch
+patch_file = f"{fix_dir}/{fix_id}.patch"
+with open(patch_file, 'w') as f:
+    f.write(diff_content)
+
+# Get git author
+author_result = subprocess.run(['git', 'config', 'user.name'], capture_output=True, text=True)
+author = author_result.stdout.strip() or 'anonymous'
+
+# Get project name
+project = os.path.basename(os.getcwd())
+
+# Save metadata
+meta = {
+    "id": fix_id,
+    "description": description,
+    "project": project,
+    "author": author,
+    "created": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+    "status": "pending"
+}
+with open(f"{fix_dir}/{fix_id}.json", 'w') as f:
+    json.dump(meta, f, indent=2)
+
+print(f"\033[0;32m✓ Fix submitted: {fix_id}\033[0m")
+print(f"Patch saved to: {patch_file}")
+print()
+print(f"To share with community: social post bugs \"{description}\"")
+PYEOF
+}
+
+# Main
+case "$1" in
+    init)
+        init_project "$2"
+        ;;
+    status|st)
+        show_status
+        ;;
+    save|commit)
+        shift
+        save_snapshot "$@"
+        ;;
+    history|log)
+        view_history
+        ;;
+    show)
+        show_snapshot "$2"
+        ;;
+    restore|checkout)
+        restore_snapshot "$2"
+        ;;
+    diff)
+        show_diff
+        ;;
+    branch)
+        create_branch "$2"
+        ;;
+    branches)
+        list_branches
+        ;;
+    switch)
+        switch_branch "$2"
+        ;;
+    merge)
+        merge_branch "$2"
+        ;;
+    share|publish)
+        share_project
+        ;;
+    clone|download)
+        clone_project "$2"
+        ;;
+    pull|update)
+        pull_updates
+        ;;
+    push|upload)
+        push_updates
+        ;;
+    autosave)
+        autosave_toggle "$2"
+        ;;
+    fix-submit)
+        shift
+        submit_fix "$@"
+        ;;
+    help|-h|--help|"")
+        show_help
+        ;;
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        show_help
+        ;;
+esac

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- JSON file icon - curly braces -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M14,2H6C4.9,2 4,2.9 4,4v16c0,1.1 0.9,2 2,2h12c1.1,0 2,-0.9 2,-2V8L14,2z" />
+    <path
+        android:fillColor="#FFECB3"
+        android:pathData="M14,2v6h6L14,2z" />
+    <!-- Curly braces { } -->
+    <path
+        android:fillColor="#795548"
+        android:pathData="M8,10c-0.5,0 -1,0.5 -1,1v1.5c0,0.5 -0.5,1 -1,1v1c0.5,0 1,0.5 1,1v1.5c0,0.5 0.5,1 1,1v-1c-0.5,0 -0.5,-0.5 -0.5,-1v-1c0,-0.5 -0.5,-1 -1,-1.5c0.5,-0.5 1,-1 1,-1.5v-1c0,-0.5 0,-1 0.5,-1V10z" />
+    <path
+        android:fillColor="#795548"
+        android:pathData="M16,10c0.5,0 1,0.5 1,1v1.5c0,0.5 0.5,1 1,1v1c-0.5,0 -1,0.5 -1,1v1.5c0,0.5 -0.5,1 -1,1v-1c0.5,0 0.5,-0.5 0.5,-1v-1c0,-0.5 0.5,-1 1,-1.5c-0.5,-0.5 -1,-1 -1,-1.5v-1c0,-0.5 0,-1 -0.5,-1V10z" />
+</vector>

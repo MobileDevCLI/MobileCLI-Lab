@@ -1,0 +1,346 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# DITTO - Dynamic Interface Transformation Technology for Operators
+# Part of MobileCLI v83+
+# Full ecosystem command for profiles, sessions, and UI morphing
+
+DITTO_DIR="$HOME/.ditto"
+PROFILES_DIR="$DITTO_DIR/profiles"
+TERMUX_DIR="$HOME/.termux"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+show_help() {
+    echo -e "${CYAN}DITTO - Dynamic Interface Transformation${NC}"
+    echo ""
+    echo -e "${YELLOW}UI Commands (instant):${NC}"
+    echo "  ditto bgcolor:#RRGGBB   - Change background color"
+    echo "  ditto fullscreen:true   - Enable fullscreen"
+    echo "  ditto fullscreen:false  - Disable fullscreen"
+    echo "  ditto fontsize:N        - Set font size"
+    echo "  ditto toast:message     - Show toast"
+    echo "  ditto reload            - Reload settings"
+    echo "  ditto vibrate           - Vibrate phone"
+    echo ""
+    echo -e "${YELLOW}Profile Commands:${NC}"
+    echo "  ditto save <name>       - Save current environment as profile"
+    echo "  ditto load <name>       - Load a saved profile"
+    echo "  ditto list              - List all saved profiles"
+    echo "  ditto delete <name>     - Delete a profile"
+    echo "  ditto export <name>     - Export profile to stdout"
+    echo "  ditto import <name>     - Import profile from stdin"
+    echo "  ditto info <name>       - Show profile details"
+    echo ""
+    echo -e "${YELLOW}Quick Themes:${NC}"
+    echo "  ditto theme dark        - Dark theme"
+    echo "  ditto theme light       - Light/white theme"
+    echo "  ditto theme hacker      - Green on black"
+    echo "  ditto theme ocean       - Blue theme"
+    echo ""
+    echo -e "${YELLOW}Examples:${NC}"
+    echo "  ditto save dev-setup"
+    echo "  ditto load dev-setup"
+    echo "  ditto bgcolor:#1a1a2e"
+    echo "  ditto theme hacker"
+}
+
+# Send UI command to app
+send_ui_command() {
+    echo "$1" > "$TERMUX_DIR/ditto_command"
+}
+
+# Save current environment as profile
+save_profile() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Error: Profile name required${NC}"
+        echo "Usage: ditto save <profile-name>"
+        return 1
+    fi
+
+    local profile_dir="$PROFILES_DIR/$name"
+    mkdir -p "$profile_dir"
+
+    # Copy termux.properties if exists
+    if [ -f "$TERMUX_DIR/termux.properties" ]; then
+        cp "$TERMUX_DIR/termux.properties" "$profile_dir/"
+    fi
+
+    # Copy colors.properties if exists
+    if [ -f "$TERMUX_DIR/colors.properties" ]; then
+        cp "$TERMUX_DIR/colors.properties" "$profile_dir/"
+    fi
+
+    # Save installed packages list
+    pkg list-installed 2>/dev/null | cut -d'/' -f1 > "$profile_dir/packages.list"
+
+    # Copy .bashrc if exists
+    if [ -f "$HOME/.bashrc" ]; then
+        cp "$HOME/.bashrc" "$profile_dir/"
+    fi
+
+    # Copy custom scripts from ~/bin if exists
+    if [ -d "$HOME/bin" ]; then
+        cp -r "$HOME/bin" "$profile_dir/" 2>/dev/null
+    fi
+
+    # Create manifest
+    cat > "$profile_dir/manifest.json" << EOF
+{
+  "name": "$name",
+  "version": "1.0.0",
+  "author": "$(whoami)",
+  "description": "Saved profile",
+  "created": "$(date -Iseconds)",
+  "device": "$(getprop ro.product.model 2>/dev/null || echo 'unknown')"
+}
+EOF
+
+    echo -e "${GREEN}Profile '$name' saved successfully${NC}"
+    echo "Location: $profile_dir"
+    ls -la "$profile_dir"
+}
+
+# Load a saved profile
+load_profile() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Error: Profile name required${NC}"
+        echo "Usage: ditto load <profile-name>"
+        return 1
+    fi
+
+    local profile_dir="$PROFILES_DIR/$name"
+
+    if [ ! -d "$profile_dir" ]; then
+        echo -e "${RED}Error: Profile '$name' not found${NC}"
+        echo "Available profiles:"
+        list_profiles
+        return 1
+    fi
+
+    # Restore termux.properties
+    if [ -f "$profile_dir/termux.properties" ]; then
+        cp "$profile_dir/termux.properties" "$TERMUX_DIR/"
+        echo "Restored termux.properties"
+    fi
+
+    # Restore colors.properties
+    if [ -f "$profile_dir/colors.properties" ]; then
+        cp "$profile_dir/colors.properties" "$TERMUX_DIR/"
+        echo "Restored colors.properties"
+    fi
+
+    # Restore .bashrc
+    if [ -f "$profile_dir/.bashrc" ]; then
+        cp "$profile_dir/.bashrc" "$HOME/"
+        echo "Restored .bashrc"
+    fi
+
+    # Restore custom scripts
+    if [ -d "$profile_dir/bin" ]; then
+        mkdir -p "$HOME/bin"
+        cp -r "$profile_dir/bin/"* "$HOME/bin/" 2>/dev/null
+        echo "Restored custom scripts"
+    fi
+
+    # Reload settings in app
+    send_ui_command "reload"
+
+    echo -e "${GREEN}Profile '$name' loaded successfully${NC}"
+    echo -e "${YELLOW}Note: Restart app to apply all changes${NC}"
+}
+
+# List all profiles
+list_profiles() {
+    echo -e "${CYAN}Saved Profiles:${NC}"
+    echo ""
+
+    if [ ! -d "$PROFILES_DIR" ]; then
+        echo "  (no profiles saved yet)"
+        echo ""
+        echo "Save your first profile with: ditto save <name>"
+        return
+    fi
+
+    local found=0
+    for profile in "$PROFILES_DIR"/*/; do
+        [ -d "$profile" ] || continue
+        # Use parameter expansion instead of basename (more reliable)
+        profile="${profile%/}"  # Remove trailing slash
+        name="${profile##*/}"   # Get last component
+        [ -z "$name" ] || [ "$name" = "*" ] && continue
+        found=1
+        if [ -f "$profile/manifest.json" ]; then
+            created=$(grep -o '"created": "[^"]*"' "$profile/manifest.json" 2>/dev/null | cut -d'"' -f4 | cut -dT -f1)
+            echo -e "  ${GREEN}$name${NC} (created: $created)"
+        else
+            echo -e "  ${GREEN}$name${NC}"
+        fi
+    done
+
+    if [ $found -eq 0 ]; then
+        echo "  (no profiles saved yet)"
+        echo ""
+        echo "Save your first profile with: ditto save <name>"
+    fi
+    echo ""
+}
+
+# Delete a profile
+delete_profile() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Error: Profile name required${NC}"
+        return 1
+    fi
+
+    local profile_dir="$PROFILES_DIR/$name"
+
+    if [ ! -d "$profile_dir" ]; then
+        echo -e "${RED}Error: Profile '$name' not found${NC}"
+        return 1
+    fi
+
+    rm -rf "$profile_dir"
+    echo -e "${GREEN}Profile '$name' deleted${NC}"
+}
+
+# Show profile info
+profile_info() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Error: Profile name required${NC}"
+        return 1
+    fi
+
+    local profile_dir="$PROFILES_DIR/$name"
+
+    if [ ! -d "$profile_dir" ]; then
+        echo -e "${RED}Error: Profile '$name' not found${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}Profile: $name${NC}"
+    echo ""
+
+    if [ -f "$profile_dir/manifest.json" ]; then
+        cat "$profile_dir/manifest.json"
+        echo ""
+    fi
+
+    echo "Contents:"
+    ls -la "$profile_dir"
+}
+
+# Export profile to stdout
+export_profile() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}Error: Profile name required${NC}" >&2
+        return 1
+    fi
+
+    local profile_dir="$PROFILES_DIR/$name"
+
+    if [ ! -d "$profile_dir" ]; then
+        echo -e "${RED}Error: Profile '$name' not found${NC}" >&2
+        return 1
+    fi
+
+    echo "DITTO-PROFILE-V1"
+    echo "name: $name"
+    echo "exported: $(date -Iseconds)"
+    echo "---"
+
+    for file in "$profile_dir"/*; do
+        if [ -f "$file" ]; then
+            fname=$(basename "$file")
+            echo "[$fname]"
+            base64 "$file"
+            echo "---"
+        fi
+    done
+
+    echo "END-DITTO"
+}
+
+# Apply quick themes
+apply_theme() {
+    local theme="$1"
+    case "$theme" in
+        dark)
+            send_ui_command "bgcolor:#1a1a2e"
+            echo -e "${GREEN}Applied dark theme${NC}"
+            ;;
+        light|white)
+            send_ui_command "bgcolor:#FFFFFF"
+            echo -e "${GREEN}Applied light theme${NC}"
+            ;;
+        hacker|matrix)
+            send_ui_command "bgcolor:#0a0a0a"
+            echo -e "${GREEN}Applied hacker theme${NC}"
+            ;;
+        ocean|blue)
+            send_ui_command "bgcolor:#0d1b2a"
+            echo -e "${GREEN}Applied ocean theme${NC}"
+            ;;
+        *)
+            echo -e "${RED}Unknown theme: $theme${NC}"
+            echo "Available: dark, light, hacker, ocean"
+            return 1
+            ;;
+    esac
+}
+
+# Main command handler
+case "$1" in
+    # UI Commands (pass through to app)
+    bgcolor:*|fullscreen:*|fontsize:*|toast:*|reload|vibrate)
+        send_ui_command "$1"
+        ;;
+
+    # Profile management
+    save)
+        save_profile "$2"
+        ;;
+    load)
+        load_profile "$2"
+        ;;
+    list|ls)
+        list_profiles
+        ;;
+    delete|rm)
+        delete_profile "$2"
+        ;;
+    info)
+        profile_info "$2"
+        ;;
+    export)
+        export_profile "$2"
+        ;;
+    import)
+        # TODO: implement import
+        echo "Import not yet implemented"
+        ;;
+
+    # Themes
+    theme)
+        apply_theme "$2"
+        ;;
+
+    # Help
+    help|-h|--help|"")
+        show_help
+        ;;
+
+    *)
+        # Try as UI command
+        send_ui_command "$1"
+        ;;
+esac

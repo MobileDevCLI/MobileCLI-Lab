@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Game Engine Overlay - Shows after setup, with slide-out Claude terminal -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/game_engine_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1a1a2e">
+
+    <androidx.slidingpanelayout.widget.SlidingPaneLayout
+        android:id="@+id/sliding_pane"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Main Game Engine UI (Left/Primary Pane) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="#1a1a2e">
+
+            <!-- Top Toolbar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:background="#0f0f1a"
+                android:padding="4dp"
+                android:gravity="center_vertical">
+
+                <!-- Menu button (swipe from left for drawer) -->
+                <Button
+                    android:id="@+id/btn_menu"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="☰"
+                    android:textSize="20sp"
+                    android:textColor="#ffffff"
+                    android:background="@android:color/transparent" />
+
+                <!-- Project Name -->
+                <TextView
+                    android:id="@+id/project_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="No Project"
+                    android:textColor="#ffffff"
+                    android:textSize="16sp"
+                    android:paddingStart="8dp" />
+
+                <!-- Play Button -->
+                <Button
+                    android:id="@+id/btn_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="▶ Play"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp"
+                    android:background="#4CAF50"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <!-- Add Object -->
+                <Button
+                    android:id="@+id/btn_add"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="+ Add"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp"
+                    android:background="#2196F3"
+                    android:layout_marginStart="4dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <!-- Build APK Button -->
+                <Button
+                    android:id="@+id/btn_build"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="📦 Build"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp"
+                    android:background="#9C27B0"
+                    android:layout_marginStart="4dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <!-- Claude Toggle Button -->
+                <Button
+                    android:id="@+id/btn_claude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="🤖 Claude"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp"
+                    android:background="#e94560"
+                    android:layout_marginStart="4dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+            </LinearLayout>
+
+            <!-- Main Content Area -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <!-- Hierarchy Panel (Left) -->
+                <LinearLayout
+                    android:id="@+id/hierarchy_panel"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="#16213e"
+                    android:padding="4dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Hierarchy"
+                        android:textColor="#888888"
+                        android:textSize="12sp"
+                        android:padding="4dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#333333" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/hierarchy_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+
+                <!-- 3D Viewport (Center) -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <WebView
+                        android:id="@+id/viewport"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <!-- Viewport Info Overlay -->
+                    <TextView
+                        android:id="@+id/viewport_info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|start"
+                        android:text="Scene: untitled | Objects: 0"
+                        android:textColor="#88ffffff"
+                        android:textSize="10sp"
+                        android:background="#44000000"
+                        android:padding="4dp" />
+
+                </FrameLayout>
+
+                <!-- Inspector Panel (Right) -->
+                <ScrollView
+                    android:id="@+id/inspector_panel"
+                    android:layout_width="180dp"
+                    android:layout_height="match_parent"
+                    android:background="#16213e">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Inspector"
+                            android:textColor="#888888"
+                            android:textSize="12sp"
+                            android:paddingBottom="4dp" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#333333" />
+
+                        <!-- Object Name -->
+                        <TextView
+                            android:id="@+id/inspector_object_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="No selection"
+                            android:textColor="#ffffff"
+                            android:textSize="14sp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp" />
+
+                        <!-- Transform Section -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Position"
+                            android:textColor="#888888"
+                            android:textSize="11sp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/pos_x"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="X"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal|numberSigned"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center" />
+
+                            <EditText
+                                android:id="@+id/pos_y"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="Y"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal|numberSigned"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center"
+                                android:layout_marginStart="4dp" />
+
+                            <EditText
+                                android:id="@+id/pos_z"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="Z"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal|numberSigned"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center"
+                                android:layout_marginStart="4dp" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Rotation"
+                            android:textColor="#888888"
+                            android:textSize="11sp"
+                            android:paddingTop="8dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/rot_x"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="X"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal|numberSigned"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center" />
+
+                            <EditText
+                                android:id="@+id/rot_y"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="Y"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal|numberSigned"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center"
+                                android:layout_marginStart="4dp" />
+
+                            <EditText
+                                android:id="@+id/rot_z"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="Z"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal|numberSigned"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center"
+                                android:layout_marginStart="4dp" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Scale"
+                            android:textColor="#888888"
+                            android:textSize="11sp"
+                            android:paddingTop="8dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/scale_x"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="X"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center" />
+
+                            <EditText
+                                android:id="@+id/scale_y"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="Y"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center"
+                                android:layout_marginStart="4dp" />
+
+                            <EditText
+                                android:id="@+id/scale_z"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="Z"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:inputType="numberDecimal"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:gravity="center"
+                                android:layout_marginStart="4dp" />
+
+                        </LinearLayout>
+
+                        <!-- Color -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Color"
+                            android:textColor="#888888"
+                            android:textSize="11sp"
+                            android:paddingTop="16dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <View
+                                android:id="@+id/color_preview"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:background="#ffffff" />
+
+                            <EditText
+                                android:id="@+id/color_hex"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                android:hint="#ffffff"
+                                android:textColor="#ffffff"
+                                android:textColorHint="#666666"
+                                android:textSize="12sp"
+                                android:background="#0f0f1a"
+                                android:padding="4dp"
+                                android:layout_marginStart="8dp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </ScrollView>
+
+            </LinearLayout>
+
+            <!-- Console Panel (Bottom) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:orientation="vertical"
+                android:background="#0f0f1a">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Console"
+                        android:textColor="#888888"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btn_clear_console"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:text="Clear"
+                        android:textSize="10sp"
+                        android:textColor="#888888"
+                        android:background="@android:color/transparent" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#333333" />
+
+                <ScrollView
+                    android:id="@+id/console_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/console_output"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="[MCG] MobileCLI Games Engine ready\n"
+                        android:textColor="#00ff00"
+                        android:textSize="10sp"
+                        android:fontFamily="monospace"
+                        android:padding="4dp" />
+
+                </ScrollView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Claude Terminal Panel (Right/Secondary Pane - slides in) -->
+        <FrameLayout
+            android:id="@+id/claude_panel"
+            android:layout_width="400dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:background="#000000">
+
+            <!-- This will contain the actual TerminalView when panel is open -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <!-- Panel header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="#1a1a1a"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Claude Code Terminal"
+                        android:textColor="#e94560"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_claude_fullscreen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="⛶"
+                        android:textSize="18sp"
+                        android:textColor="#ffffff"
+                        android:background="@android:color/transparent" />
+
+                    <Button
+                        android:id="@+id/btn_claude_close"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="✕"
+                        android:textSize="18sp"
+                        android:textColor="#ffffff"
+                        android:background="@android:color/transparent" />
+
+                </LinearLayout>
+
+                <!-- Terminal container - actual terminal will be moved here -->
+                <FrameLayout
+                    android:id="@+id/terminal_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </androidx.slidingpanelayout.widget.SlidingPaneLayout>
+
+</FrameLayout>

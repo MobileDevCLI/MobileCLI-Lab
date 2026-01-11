@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:id="@+id/group_file">
+        <item
+            android:id="@+id/nav_new_file"
+            android:icon="@drawable/ic_add"
+            android:title="New File" />
+
+        <item
+            android:id="@+id/nav_open_file"
+            android:icon="@drawable/ic_folder"
+            android:title="Open File" />
+
+        <item
+            android:id="@+id/nav_save_file"
+            android:icon="@drawable/ic_save"
+            android:title="Save" />
+
+        <item
+            android:id="@+id/nav_save_as"
+            android:icon="@drawable/ic_save"
+            android:title="Save As..." />
+    </group>
+
+    <group android:id="@+id/group_view">
+        <item
+            android:id="@+id/nav_toggle_terminal"
+            android:icon="@drawable/ic_terminal"
+            android:title="Toggle Terminal" />
+
+        <item
+            android:id="@+id/nav_toggle_files"
+            android:icon="@drawable/ic_folder"
+            android:title="Toggle Files Panel" />
+
+        <item
+            android:id="@+id/nav_toggle_properties"
+            android:icon="@drawable/ic_settings"
+            android:title="Toggle Properties" />
+    </group>
+
+    <group android:id="@+id/group_navigation">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_home"
+            android:title="Home" />
+
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="Settings" />
+    </group>
+
+</menu>

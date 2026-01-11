@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Primary actions -->
+    <item
+        android:id="@+id/action_run"
+        android:icon="@drawable/ic_play"
+        android:title="Run"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_save"
+        android:icon="@drawable/ic_save"
+        android:title="Save"
+        app:showAsAction="ifRoom" />
+
+    <!-- Overflow menu -->
+    <item
+        android:id="@+id/action_toggle_left_panel"
+        android:title="Toggle Files Panel"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_toggle_right_panel"
+        android:title="Toggle Properties Panel"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_toggle_bottom_panel"
+        android:title="Toggle Console"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_home"
+        android:title="Back to Home"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="Settings"
+        app:showAsAction="never" />
+
+</menu>

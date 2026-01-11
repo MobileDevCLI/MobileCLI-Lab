@@ -1,0 +1,21 @@
+# Build outputs
+app/build/
+build/
+*/build/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+local.properties
+
+# Engine modules build
+engine-*/build/
+
+# Misc
+*.log
+*.tmp
