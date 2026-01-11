@@ -26,11 +26,9 @@ An AI running inside this app rebuilt it from v1.6.1 to v1.8.1-dev - making hard
 
 ---
 
-## Current Experiments
+## BREAKTHROUGH: Multi-Agent System VERIFIED
 
-### Multi-Agent System (Active)
-
-Multiple Claude Code instances communicating with each other.
+**January 10, 2026** - Two Claude Code sessions successfully communicated with each other inside MobileCLI.
 
 ```bash
 agent discover        # Find all Claude sessions
@@ -40,9 +38,19 @@ agent send <id> <msg> # Send message to another agent
 agent hub             # Launch supervisor mode
 ```
 
-**Status:** In testing - needs verification
-**Documentation:** [MULTI-AGENT.md](MULTI-AGENT.md)
+**Status:** **VERIFIED - WORKING**
+**Full Story:** [DISCOVERY.md](DISCOVERY.md)
+**Technical Docs:** [MULTI-AGENT.md](MULTI-AGENT.md)
 **Lab Notes:** [LAB-NOTES.md](LAB-NOTES.md)
+
+### What Happened
+
+- Session 2c783855 built the multi-agent system
+- Session e47fb870 was launched in a second tab
+- e47fb870 discovered 2c783855, sent messages, and even fixed bugs
+- 2c783855 received all messages instantly
+
+**This is the world's first mobile app with local AI-to-AI communication.**
 
 ---
 

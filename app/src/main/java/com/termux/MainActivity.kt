@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity(), TerminalViewClient, TerminalSessionCli
     // Multi-session support
     private val sessions = mutableListOf<TerminalSession>()
     private var currentSessionIndex = 0
-    private val maxSessions = 10
+    private val maxSessions = 100  // Increased for multi-agent support (was 10)
 
     // Flag to track if bootstrap is ready but waiting for service
     private var bootstrapReadyPendingSession = false
