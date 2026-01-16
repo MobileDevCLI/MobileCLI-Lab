@@ -24,6 +24,55 @@ MobileCLI is a **proprietary Android terminal app** that runs AI assistants (Cla
 
 ---
 
+## INFRASTRUCTURE (Website, Backend, Payments)
+
+### Website
+| Property | Value |
+|----------|-------|
+| URL | https://mobilecli.com |
+| Local Path | `~/website/` |
+| GitHub Repo | `MobileDevCLI/website` |
+| Hosting | **Vercel** |
+| Config | `~/website/vercel.json` |
+
+### Supabase (Backend)
+| Property | Value |
+|----------|-------|
+| Project URL | `mwxlguqukyfberyhtkmg.supabase.co` |
+| SQL Setup | `~/website/supabase-setup.sql` |
+| Functions | `~/website/supabase/functions/` |
+
+### Stripe (Payments)
+| Property | Value |
+|----------|-------|
+| Config | `~/website/js/stripe-config.js` |
+| Functions | `create-checkout`, `customer-portal`, `stripe-webhook` |
+| Dashboard | `~/website/dashboard.html` |
+
+### Slack MCP Integration
+| Property | Value |
+|----------|-------|
+| URL | `https://slack.mcp.anthropic.com/mcp` |
+
+### Key Website Pages
+| Page | Purpose |
+|------|---------|
+| `index.html` | Homepage |
+| `pricing.html` | Subscription plans |
+| `download.html` | APK downloads |
+| `app-story.html` | The development story |
+| `proof.html` | Evidence of achievement |
+| `dashboard.html` | User dashboard |
+| `studio.html` | MobileCLI Studio |
+
+### Deploy Website
+```bash
+cd ~/website
+vercel --prod
+```
+
+---
+
 ## THE TWO GOLD APKs (DO NOT LOSE THESE)
 
 ### 1. Stable Base: v1.6.1-fix
@@ -45,6 +94,17 @@ MobileCLI is a **proprietary Android terminal app** that runs AI assistants (Cla
 | Bootstrap | mobilecli-v67 |
 | Location | `~/downloads/MobileCLI-Lab-SELFMOD.apk` |
 | Status | **Has self-modification features** |
+
+### WARNING: Multiple v1.6.x Versions Exist
+
+| File | Size | Status |
+|------|------|--------|
+| `MobileCLI-v1.6.1-fix.apk` | 6,877,419 | **GOLD - Use this** |
+| `MobileCLI-v1.6.0-secure.apk` | 6,877,419 | Same as above (identical) |
+| `MobileCLI-v1.6.2-overlay-fix.apk` | 5,911,229 | **DIFFERENT - May be broken** |
+| `MobileCLI-v1.6.3-welcome-fix.apk` | 7,149,956 | **DIFFERENT - May be broken** |
+
+**Rule:** If size is 6,877,419 bytes, it's the gold v1.6.1-fix. Other sizes are experimental attempts.
 
 ---
 
