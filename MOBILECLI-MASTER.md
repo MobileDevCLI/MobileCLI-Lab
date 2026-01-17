@@ -24,6 +24,58 @@ MobileCLI is a **proprietary Android terminal app** that runs AI assistants (Cla
 
 ---
 
+## THE TWO GOLD APKs (January 16, 2026 - VERIFIED)
+
+### 1. WORKING STABLE: v1.8.1-dev
+| Property | Value |
+|----------|-------|
+| File | `MobileCLI-v1.8.1-dev-WORKING.apk` |
+| Internal Version | **1.8.1-dev (versionCode 76)** |
+| MD5 | `d473f8f5c3f06a42fb8fd4d5aa79bd91` |
+| Size | 6,877,419 bytes |
+| Bootstrap | mobilecli-v66 |
+| Location | `/sdcard/Download/MobileCLI-v1.8.1-dev-WORKING.apk` |
+| Status | **CURRENT STABLE - Use for development** |
+| Verified | Jan 16, 2026 - Fresh install tested and working |
+
+### 2. LEGACY PROOF: AI Self-Modified (January 9, 2026)
+| Property | Value |
+|----------|-------|
+| File | `LEGACY-AI-SELF-MODIFIED-Jan9-2026.apk` |
+| External Labels | v1.5.1-welcome → v1.6.0-secure → v1.6.1-fix |
+| Internal Version | **1.8.1-dev (versionCode 76)** |
+| MD5 | `81663d84f041a8e8eb35be6e1163a4f6` |
+| Size | 6,877,419 bytes |
+| Location | `/sdcard/Download/LEGACY-AI-SELF-MODIFIED-Jan9-2026.apk` |
+| Status | **HISTORICAL PROOF - AI internally changed version** |
+
+### The Discovery Story (January 16, 2026)
+
+After 4 days of confusion with hundreds of APKs named similarly, we discovered:
+
+1. **The naming was misleading:** Files named "v1.6.1-fix" actually contained **v1.8.1-dev** internally
+2. **AI self-modification proof:** On January 9, the AI modified the app, changing the internal version from the external label (1.5.1/1.6.x) to 1.8.1-dev
+3. **Two distinct builds exist:** Same internal version (1.8.1-dev) but different MD5s - the Jan 9 original and the current stable
+4. **Verification method:** Use `aapt dump badging <apk>` to see true internal version, not filename
+
+### WARNING: Filename vs Internal Version
+
+Many APKs have **MISLEADING NAMES**. Always verify with:
+```bash
+aapt dump badging <apk> | grep versionName
+```
+
+| Filename | Actual Internal Version |
+|----------|------------------------|
+| MobileCLI-v1.5.1-welcome.apk | 1.8.1-dev |
+| MobileCLI-v1.6.0-secure.apk | 1.8.1-dev |
+| MobileCLI-v1.6.1-fix.apk | 1.8.1-dev |
+| MobileCLI-CURRENTLY-RUNNING.apk | 1.8.1-dev |
+
+**Rule:** Trust the MD5 hash, not the filename.
+
+---
+
 ## INFRASTRUCTURE (Website, Backend, Payments)
 
 ### Website
@@ -49,62 +101,11 @@ MobileCLI is a **proprietary Android terminal app** that runs AI assistants (Cla
 | Functions | `create-checkout`, `customer-portal`, `stripe-webhook` |
 | Dashboard | `~/website/dashboard.html` |
 
-### Slack MCP Integration
-| Property | Value |
-|----------|-------|
-| URL | `https://slack.mcp.anthropic.com/mcp` |
-
-### Key Website Pages
-| Page | Purpose |
-|------|---------|
-| `index.html` | Homepage |
-| `pricing.html` | Subscription plans |
-| `download.html` | APK downloads |
-| `app-story.html` | The development story |
-| `proof.html` | Evidence of achievement |
-| `dashboard.html` | User dashboard |
-| `studio.html` | MobileCLI Studio |
-
 ### Deploy Website
 ```bash
 cd ~/website
 vercel --prod
 ```
-
----
-
-## THE TWO GOLD APKs (DO NOT LOSE THESE)
-
-### 1. Stable Base: v1.6.1-fix
-| Property | Value |
-|----------|-------|
-| File | `MobileCLI-v1.6.1-fix.apk` |
-| MD5 | `d473f8f5c3f06a42fb8fd4d5aa79bd91` |
-| Size | 6,877,419 bytes |
-| Bootstrap | mobilecli-v66 |
-| Location | `~/downloads/MobileCLI-v1.6.1-fix.apk` |
-| Status | **99% PERFECT - Use as baseline** |
-
-### 2. Self-Modification: Lab-SELFMOD
-| Property | Value |
-|----------|-------|
-| File | `MobileCLI-Lab-SELFMOD.apk` |
-| MD5 | `a9a7e18e04280ce8a41d03980ecb0b20` |
-| Size | 7,327,663 bytes |
-| Bootstrap | mobilecli-v67 |
-| Location | `~/downloads/MobileCLI-Lab-SELFMOD.apk` |
-| Status | **Has self-modification features** |
-
-### WARNING: Multiple v1.6.x Versions Exist
-
-| File | Size | Status |
-|------|------|--------|
-| `MobileCLI-v1.6.1-fix.apk` | 6,877,419 | **GOLD - Use this** |
-| `MobileCLI-v1.6.0-secure.apk` | 6,877,419 | Same as above (identical) |
-| `MobileCLI-v1.6.2-overlay-fix.apk` | 5,911,229 | **DIFFERENT - May be broken** |
-| `MobileCLI-v1.6.3-welcome-fix.apk` | 7,149,956 | **DIFFERENT - May be broken** |
-
-**Rule:** If size is 6,877,419 bytes, it's the gold v1.6.1-fix. Other sizes are experimental attempts.
 
 ---
 
@@ -138,7 +139,7 @@ vercel --prod
 - Auto-create CLAUDE.md when entering git repos
 - Persistent AI memory system (`~/.mobilecli/memory/`)
 - 42 API scripts built-in
-- Self-modification capability (Lab version)
+- Self-modification capability
 
 ---
 
@@ -149,21 +150,27 @@ vercel --prod
 |------|---------|------|
 | `~/MobileCLI-Production` | Main development | **YES** |
 | `~/MobileCLI-Lab` | Self-modification experiments | **YES (carefully)** |
-| `~/MobileCLI-Store` | Store-ready version | Reference only |
-| `~/MobileCLI-Developer` | Dev edition | Reference only |
+| `~/MobileCLI-Baseline` | Reference documentation | Reference only |
 
-### Gold Documentation (DO NOT MODIFY)
+### Critical Files
+| File | Location | Purpose |
+|------|----------|---------|
+| Signing Key | `~/mobilecli-release.keystore` | **PROTECT THIS** |
+| Main CLAUDE.md | `~/CLAUDE.md` | 56KB project instructions |
+
+### Gold Documentation
 | File | Location | Contains |
 |------|----------|----------|
 | `SYSTEM_PROMPT.md` | `~/.mobilecli/` | AI environment knowledge |
 | `DEVELOPMENT_HISTORY.md` | `~/` | v1-v32 journey |
 | `APP_BUILD_HISTORY.md` | `~/` | All bugs and fixes |
-| `FEATURE_PLANS_v33+.md` | `~/` | Future roadmap |
+| `INTELLECTUAL_PROPERTY_REGISTER.md` | `~/MobileCLI-Lab/` | 15 documented inventions |
+| `21_INVENTIONS.md` | `~/MobileCLI-Lab/` | 21 invention ideas |
 
 ### Decompiled Reference
 | Path | Contains |
 |------|----------|
-| `~/v161-decompiled/sources/com/termux/` | Decompiled v1.6.1 source |
+| `~/v161-decompiled/sources/com/termux/` | Decompiled source |
 
 ---
 
@@ -175,16 +182,16 @@ These were experiments that went wrong. **DO NOT develop these:**
 |---------|---------|
 | MobileCLI-Games | Side quest, incomplete |
 | Game developing mode | Abandoned experiment |
-| Ditto profiles | Experimental, broken |
+| Ditto profiles standalone | Experimental, broken |
 | Any "v80-v99" numbered builds | Experimental iterations |
 
 **If user asks about these, redirect to main MobileCLI development.**
 
 ---
 
-## CURRENT DEVELOPMENT STATE
+## CURRENT DEVELOPMENT STATE (v1.8.1-dev)
 
-### What Works (v1.6.1-fix)
+### What Works
 - Bootstrap download and extraction
 - AI selection (Claude/Gemini/Codex)
 - Terminal with full Linux environment
@@ -193,25 +200,29 @@ These were experiments that went wrong. **DO NOT develop these:**
 - Wake lock for background
 - URL opening (OAuth works)
 - Developer mode (7-tap)
+- Fresh install tested and verified (Jan 16, 2026)
 
 ### What Needs Work
 - Multi-agent communication (Lab feature)
 - Self-modification wizard (Lab feature)
-- Home screen widgets (planned v33)
-- Boot scripts (planned v33)
+- Home screen widgets (planned)
+- Boot scripts (planned)
 
 ---
 
 ## HOW TO START DEVELOPING
 
-### Step 1: Verify Environment
+### Step 1: Verify Gold APKs Exist
 ```bash
-# Check gold APKs exist
-ls -la ~/downloads/MobileCLI-v1.6.1-fix.apk
-ls -la ~/downloads/MobileCLI-Lab-SELFMOD.apk
+# Check working stable
+ls -la /sdcard/Download/MobileCLI-v1.8.1-dev-WORKING.apk
+md5sum /sdcard/Download/MobileCLI-v1.8.1-dev-WORKING.apk
+# Should be: d473f8f5c3f06a42fb8fd4d5aa79bd91
 
-# Check source exists
-ls ~/MobileCLI-Production/app/src/main/java/com/termux/
+# Check legacy proof
+ls -la /sdcard/Download/LEGACY-AI-SELF-MODIFIED-Jan9-2026.apk
+md5sum /sdcard/Download/LEGACY-AI-SELF-MODIFIED-Jan9-2026.apk
+# Should be: 81663d84f041a8e8eb35be6e1163a4f6
 ```
 
 ### Step 2: Build
@@ -268,10 +279,11 @@ If you're a new Claude Code session helping with MobileCLI:
 
 1. **Read this entire file first**
 2. **Use `~/MobileCLI-Production` for development**
-3. **Reference `~/v161-decompiled/` to understand existing code**
-4. **DO NOT create new repos or side projects**
-5. **Build and test on actual device**
-6. **Save APKs to `/sdcard/Download/` with version numbers**
+3. **The working APK is v1.8.1-dev (NOT v1.6.1 despite old filenames)**
+4. **Verify APK versions with `aapt dump badging`, not filenames**
+5. **DO NOT create new repos or side projects**
+6. **Build and test on actual device**
+7. **Save APKs to `/sdcard/Download/` with version numbers**
 
 ---
 
@@ -279,11 +291,15 @@ If you're a new Claude Code session helping with MobileCLI:
 
 | Date | Change |
 |------|--------|
-| Jan 16, 2026 | Created master document to restore development capability |
-| Jan 10, 2026 | v1.6.1-fix identified as gold standard |
+| Jan 16, 2026 | **MAJOR UPDATE:** Discovered true version is 1.8.1-dev, not v1.6.1. Updated gold APKs. Added legacy proof APK. |
+| Jan 16, 2026 | Verified working APK via fresh install test |
+| Jan 10, 2026 | Original gold APK identified (mislabeled as v1.6.1-fix) |
+| Jan 9, 2026 | AI self-modification created internal v1.8.1-dev |
 | Jan 7, 2026 | Original documentation created |
 | Jan 5, 2026 | v10 breakthrough (HOME directory fix) |
 
 ---
 
 **This document is the canonical source. When in doubt, follow this.**
+
+**Copyright 2026 Samblamz / MobileDevCLI. All Rights Reserved.**
